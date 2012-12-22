@@ -1,0 +1,2 @@
+This is a simple application launcher written in C#/WPF. It saves a list of the running application every 5 minutes to they can be launched quickly using this tool.
+Use CTRL+SPACE to focus, write the first few letters of an application and it will show up if it's added in the list. F1 opens up the list for viewing and editing.
