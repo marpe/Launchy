@@ -1,0 +1,39 @@
+﻿<Window x:Class="Launchy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="400" Width="800" WindowStartupLocation="CenterScreen" Name="window" StateChanged="window_StateChanged" Activated="window_Activated" Closing="window_Closing" AllowsTransparency="True" WindowStyle="None" Background="Transparent" Deactivated="window_Deactivated" Topmost="True">
+
+    <StackPanel>
+        <Border BorderThickness="8">
+            <Border.BorderBrush>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#CCC2D5FF" Offset="0"/>
+                    <GradientStop Color="#CC76A0FB" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.BorderBrush>
+            <TextBox BorderThickness="0" VerticalContentAlignment="Center" Name="tbInput" Height="32" TextWrapping="Wrap" VerticalAlignment="Top" KeyDown="tbInput_KeyDown" KeyUp="tbInput_KeyUp" TextChanged="tbInput_TextChanged" PreviewKeyDown="tbInput_PreviewKeyDown"/>
+        </Border>
+        <Border BorderBrush="#CC76A0FB" BorderThickness="8,0,8,8" Visibility="{Binding hasAutoCompleteItems}">
+            <ListBox HorizontalContentAlignment="Stretch" MaxHeight="300" BorderThickness="0"  Name="lbAutoComplete" ItemsSource="{Binding autoComplete}" MouseDoubleClick="lbAutoComplete_MouseDoubleClick_1" PreviewKeyDown="lbAutoComplete_PreviewKeyDown" MouseRightButtonUp="lbAutoComplete_MouseRightButtonUp">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Padding" Value="0"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Background="{Binding Background}">
+                            <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                                <Image Source="{Binding Icon}" MinHeight="32" MinWidth="32" Margin="2,0,10,0"></Image>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}" Margin="0,0,0,2"></TextBlock>
+                                    <TextBlock Text="{Binding Command}"></TextBlock>
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+    </StackPanel>
+</Window>
