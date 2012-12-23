@@ -82,7 +82,7 @@ namespace Launchy
                 new Entry() { Title = "Date/Time Properties", Command = "timedate.cpl" },
                 new Entry() { Title = "Display Properties", Command = "desk.cpl" },
                 new Entry() { Title = "Sound Properties", Command = "mmsys.cpl" },
-                new Entry() { Title = "Sky Drive", Command = @"C:\Users\marpe\SkyDrive\Dokument" },
+             //   new Entry() { Title = "Sky Drive", Command = @"C:\Users\marpe\SkyDrive\Dokument" }, absolute paths won't turn out well...
             };
 
             var cm = new System.Windows.Forms.ContextMenu();
@@ -100,7 +100,7 @@ namespace Launchy
 
         void notifyIcon_MouseDoubleClick(object sender, System.Windows.Forms.MouseEventArgs e)
         {
-            showList();
+      //      showList();
         }
 
         EntryList list = null;
@@ -246,11 +246,19 @@ namespace Launchy
             var processes = Process.GetProcesses();
             foreach (var proc in processes)
             {
-                if (proc.MainWindowTitle.MyStartsWith(input))
+                try
                 {
-                    var filename = proc.MainModule.FileName;
-                    var title = proc.MainWindowTitle;
-                    auto.Add(new Entry(title, filename) { Background = Brushes.CornflowerBlue });
+                    if (proc.MainWindowTitle.MyStartsWith(input))
+                    {
+                        var filename = proc.MainModule.FileName;
+                        var title = proc.MainWindowTitle;
+                        auto.Add(new Entry(title, filename) { Background = Brushes.CornflowerBlue });
+                    }
+                }
+
+                catch (Win32Exception)
+                {
+                    //don't add if it's a 32 bit launchy and a 64 bit app (do nothing)
                 }
             }
 
@@ -286,11 +294,19 @@ namespace Launchy
             var processes = Process.GetProcesses();
             foreach (var proc in processes)
             {
-                if (proc.MainWindowTitle.Length > 0)
+                try
                 {
-                    var filename = proc.MainModule.FileName;
-                    var title = proc.ProcessName;
-                    AddEntry(new Entry(title, filename), false);
+                    if (proc.MainWindowTitle.Length > 0)
+                    {
+                        var filename = proc.MainModule.FileName;
+                        var title = proc.ProcessName;
+                        AddEntry(new Entry(title, filename), false);
+                    }
+                }
+
+                catch (Win32Exception)
+                {
+                    // do nothing 
                 }
             }
         }
