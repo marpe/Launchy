@@ -31,6 +31,7 @@ namespace Launchy
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
     using Ico = System.Drawing.Icon;
     using ManagedWinapi.Windows;
+    using System.Management;
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         NotifyIcon notifyIcon;
@@ -289,6 +290,24 @@ namespace Launchy
             addRunning();
             tbInput.Focus();
         }
+
+        private string GetMainModuleFilepath(int processId)
+        {
+            string wmiQueryString = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + processId;
+            using (var searcher = new ManagementObjectSearcher(wmiQueryString))
+            {
+                using (var results = searcher.Get())
+                {
+                    ManagementObject mo = results.Cast<ManagementObject>().FirstOrDefault();
+                    if (mo != null)
+                    {
+                        return (string)mo["ExecutablePath"];
+                    }
+                }
+            }
+            return null;
+        }
+
         private void addRunning()
         {
             var processes = Process.GetProcesses();
@@ -298,15 +317,15 @@ namespace Launchy
                 {
                     if (proc.MainWindowTitle.Length > 0)
                     {
-                        var filename = proc.MainModule.FileName;
+                        var filename = GetMainModuleFilepath(proc.Id); //proc.MainModule.FileName;
                         var title = proc.ProcessName;
                         AddEntry(new Entry(title, filename), false);
                     }
                 }
 
-                catch (Win32Exception)
+                catch (Win32Exception e)
                 {
-                    // do nothing 
+                    //do nothing
                 }
             }
         }
