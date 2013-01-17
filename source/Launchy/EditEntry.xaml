@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Launchy.EditEntry"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="EditEntry" Height="150" Width="450" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+        Title="EditEntry" Height="150" Width="450" MinWidth="300" MaxHeight="150" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
     <StackPanel>
         <Grid Margin="10">
             <Grid.ColumnDefinitions>

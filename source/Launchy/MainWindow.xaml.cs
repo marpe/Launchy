@@ -27,11 +27,18 @@ namespace Launchy
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        NotifyIcon notifyIcon;
-        KeyboardHook hook;
-        ObservableCollection<Entry> entries { get; set; }
+        const string fileName = "entries.xml";
+
+        private NotifyIcon notifyIcon;
+        private KeyboardHook hook;
+        private ObservableCollection<Entry> entries { get; set; }
         public ObservableCollection<Entry> autoComplete { get; set; }
-        DispatcherTimer timer;
+        private DispatcherTimer timer;
+        private EntryList list = null;
+
+        private XmlSerializer xml = new XmlSerializer(typeof(ObservableCollection<Entry>));
+
+        private static MainWindow _instance;
 
         public Visibility hasAutoCompleteItems
         {
@@ -50,9 +57,8 @@ namespace Launchy
             autoComplete = new ObservableCollection<Entry>();
 
             notifyIcon = new NotifyIcon();
-            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location); // new System.Drawing.Icon(@"C:\icon.ico");
+            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(notifyIcon_MouseClick);
-            notifyIcon.MouseDoubleClick += notifyIcon_MouseDoubleClick;
             notifyIcon.Visible = true;
             hook = new KeyboardHook();
             hook.RegisterHotKey(ModifierKeys.Control, Keys.Space);
@@ -76,7 +82,6 @@ namespace Launchy
                 new Entry() { Title = "Date/Time Properties", Command = "timedate.cpl" },
                 new Entry() { Title = "Display Properties", Command = "desk.cpl" },
                 new Entry() { Title = "Sound Properties", Command = "mmsys.cpl" },
-             //   new Entry() { Title = "Sky Drive", Command = @"C:\Users\marpe\SkyDrive\Dokument" }, absolute paths won't turn out well...
             };
 
             var cm = new System.Windows.Forms.ContextMenu();
@@ -91,13 +96,6 @@ namespace Launchy
 
             _instance = this;
         }
-
-        void notifyIcon_MouseDoubleClick(object sender, System.Windows.Forms.MouseEventArgs e)
-        {
-      //      showList();
-        }
-
-        EntryList list = null;
 
         void showList()
         {
@@ -150,47 +148,12 @@ namespace Launchy
         {
             if (e.Key == Key.Down)
             {
-                lbAutoComplete.Focus();
-            }
-        }
-
-        private void lbAutoComplete_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Up && lbAutoComplete.SelectedIndex == 0)
-            {
-                tbInput.Focus();
-            }
-            else if (e.Key == Key.Down)
-            {
-            }
-            else if (e.Key == Key.Enter)
-            {
-                var entry = (Entry)lbAutoComplete.SelectedItem;
-                Execute(entry);
-            }
-            else
-            {
-                
-            }
-        }
-
-        public void Execute(Entry e)
-        {
-            try
-            {
-                e.Execute();
-                tbInput.Text = string.Empty;
-                WindowState = System.Windows.WindowState.Minimized;
-            }
-            catch (Exception ex)
-            {
-                var error = string.Format("{0} ({1})", ex.Message, e.Command);
-                System.Windows.MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                if (System.Windows.MessageBox.Show("Do you want to delete the entry?", Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                //Focus the autocomplete list when user hits the down arrow
+                if (lbAutoComplete.HasItems)
                 {
-                    entries.Remove(e);
+                    lbAutoComplete.SelectedIndex = 0;
+                    lbAutoComplete.Focus();
                 }
-                //throw;
             }
         }
 
@@ -221,11 +184,6 @@ namespace Launchy
             }
         }
 
-        private void tbInput_KeyUp(object sender, KeyEventArgs e)
-        {
-
-        }
-
         private void tbInput_TextChanged(object sender, TextChangedEventArgs e)
         {
             var input = tbInput.Text;
@@ -236,24 +194,13 @@ namespace Launchy
 
             var auto = entries.Where(x => (x.Title + " " + x.Command).MyStartsWith(input)).ToList();
 
-            //Add running windows
-            var processes = Process.GetProcesses();
-            foreach (var proc in processes)
+            //Add running windows to autocomplete
+            var running = Process.GetProcesses().Where(p => p.MainWindowTitle.Length > 0);
+            foreach (var r in running)
             {
-                try
-                {
-                    if (proc.MainWindowTitle.MyStartsWith(input))
-                    {
-                        var filename = proc.MainModule.FileName;
-                        var title = proc.MainWindowTitle;
-                        auto.Add(new Entry(title, filename) { Background = Brushes.CornflowerBlue });
-                    }
-                }
-
-                catch (Win32Exception)
-                {
-                    //don't add if it's a 32 bit launchy and a 64 bit app (do nothing)
-                }
+                var entry = entries.FirstOrDefault(x => x.Title.Equals(r.ProcessName));
+                if (entry != null && (entry.Title + " " + entry.Command + " " + r.MainWindowTitle).MyStartsWith(input))
+                    auto.Add(new Entry(r.MainWindowTitle, entry.Command, true) { Background = new SolidColorBrush(Color.FromRgb(230, 240, 255))});
             }
 
             auto.Reverse();
@@ -263,6 +210,42 @@ namespace Launchy
 
 
             lbAutoComplete.SelectedIndex = 0;
+        }
+
+        private void lbAutoComplete_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up && lbAutoComplete.SelectedIndex == 0)
+            {
+                tbInput.Focus();
+            }
+            else if (e.Key == Key.Down)
+            {
+            }
+            else if (e.Key == Key.Enter)
+            {
+                var entry = (Entry)lbAutoComplete.SelectedItem;
+                Execute(entry);
+            }
+        }
+
+        public void Execute(Entry e)
+        {
+            try
+            {
+                e.Execute();
+                tbInput.Text = string.Empty;
+                WindowState = System.Windows.WindowState.Minimized;
+            }
+            catch (Exception ex)
+            {
+                var error = string.Format("{0} ({1})", ex.Message, e.Command);
+                System.Windows.MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (System.Windows.MessageBox.Show("Do you want to delete the entry?", Title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    entries.Remove(e);
+                }
+                //throw;
+            }
         }
 
         private void window_StateChanged(object sender, EventArgs e)
@@ -310,7 +293,7 @@ namespace Launchy
                 {
                     if (proc.MainWindowTitle.Length > 0)
                     {
-                        var filename = GetMainModuleFilepath(proc.Id); //proc.MainModule.FileName;
+                        var filename = GetMainModuleFilepath(proc.Id);
                         var title = proc.ProcessName;
                         AddEntry(new Entry(title, filename), false);
                     }
@@ -328,7 +311,7 @@ namespace Launchy
             var e2 = entries.FirstOrDefault(x => x.Title.Equals(e.Title, StringComparison.CurrentCultureIgnoreCase));
             if (e2 == null)
                 entries.Add(e);
-            else if(showError)
+            else if (showError)
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("An entry with the same title/command already exists");
@@ -342,10 +325,6 @@ namespace Launchy
         {
             notifyIcon.Visible = false;
         }
-
-        const string fileName = "entries.xml";
-
-        private XmlSerializer xml = new XmlSerializer(typeof(ObservableCollection<Entry>));
 
         public void Save()
         {
@@ -395,7 +374,6 @@ namespace Launchy
 
         private static void addNewEntry(string title, string cmd)
         {
-            
             var entry = new Entry(title, cmd);
             MainWindow.Instance().AddEntry(entry);
         }
@@ -424,8 +402,6 @@ namespace Launchy
         {
             return entries.Any(x => x.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase));
         }
-
-        private static MainWindow _instance;
 
         public static MainWindow Instance()
         {
@@ -501,6 +477,12 @@ namespace Launchy
             var parts = a.ToLower().Split(split);
             b = b.ToLower();
             return parts.Any(x => x.StartsWith(b));
+        }
+
+        public static SystemWindow FindWindow(string title)
+        {
+            var win = !string.IsNullOrWhiteSpace(title) ? SystemWindow.DesktopWindow.AllDescendantWindows.FirstOrDefault(x => x.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) : null;
+            return win;
         }
     }
 }

@@ -14,7 +14,13 @@ namespace Launchy
 {
     public class Entry : IEntry, INotifyPropertyChanged
     {
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
         public delegate void ExecuteDelegate();
+
+        public event ExecuteDelegate OnExecute;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         string _title;
         public string Title
@@ -44,11 +50,6 @@ namespace Launchy
                 propertyChanged("Background");
             }
         }
-
-        public event ExecuteDelegate OnExecute;
-
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         string _command;
         public string Command
@@ -97,24 +98,27 @@ namespace Launchy
             OnExecute = startProcess;
         }
 
+        public Entry(string title, string cmd, bool restore = false)
+        {
+            Title = title;
+            Command = cmd;
+            Background = Brushes.Transparent;
+
+            if (restore)
+                OnExecute = restoreProcess;
+            else
+                OnExecute = startProcess;
+        }
+
         private void propertyChanged(string prop)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
 
-        public Entry(string title, string cmd)
+        private void restoreProcess()
         {
-            Title = title;
-            Command = cmd;
-            Background = Brushes.Transparent;
-
-            OnExecute = startProcess;
-        }
-
-        private void startProcess()
-        {
-            var win = !string.IsNullOrWhiteSpace(Title) ? SystemWindow.DesktopWindow.AllDescendantWindows.FirstOrDefault(x => x.Title.Equals(Title)) : null;
+            var win = MyUtilities.FindWindow(Title);
             if (win != null)
             {
                 if (win.WindowState == System.Windows.Forms.FormWindowState.Minimized)
@@ -125,10 +129,14 @@ namespace Launchy
 
                 SystemWindow.ForegroundWindow = win;
             }
+        }
+
+        private void startProcess()
+        {
+            if (string.IsNullOrEmpty(Command))
+                restoreProcess();
             else
-            {
                 Process.Start(Command);
-            }
         }
 
         public void Execute()
@@ -137,6 +145,5 @@ namespace Launchy
                 OnExecute();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

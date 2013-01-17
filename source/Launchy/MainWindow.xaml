@@ -11,7 +11,7 @@
                     <GradientStop Color="#CC76A0FB" Offset="1"/>
                 </LinearGradientBrush>
             </Border.BorderBrush>
-            <TextBox BorderThickness="0" VerticalContentAlignment="Center" Name="tbInput" Height="32" TextWrapping="Wrap" VerticalAlignment="Top" KeyDown="tbInput_KeyDown" KeyUp="tbInput_KeyUp" TextChanged="tbInput_TextChanged" PreviewKeyDown="tbInput_PreviewKeyDown"/>
+            <TextBox BorderThickness="0" VerticalContentAlignment="Center" Name="tbInput" Height="32" TextWrapping="Wrap" VerticalAlignment="Top" KeyDown="tbInput_KeyDown" TextChanged="tbInput_TextChanged" PreviewKeyDown="tbInput_PreviewKeyDown"/>
         </Border>
         <Border BorderBrush="#CC76A0FB" BorderThickness="8,0,8,8" Visibility="{Binding hasAutoCompleteItems}">
             <ListBox HorizontalContentAlignment="Stretch" MaxHeight="300" BorderThickness="0"  Name="lbAutoComplete" ItemsSource="{Binding autoComplete}" MouseDoubleClick="lbAutoComplete_MouseDoubleClick_1" PreviewKeyDown="lbAutoComplete_PreviewKeyDown" MouseRightButtonUp="lbAutoComplete_MouseRightButtonUp">
@@ -27,7 +27,7 @@
                                 <Image Source="{Binding Icon}" MinHeight="32" MinWidth="32" Margin="2,0,10,0"></Image>
                                 <StackPanel>
                                     <TextBlock Text="{Binding Title}" Margin="0,0,0,2"></TextBlock>
-                                    <TextBlock Text="{Binding Command}"></TextBlock>
+                                    <TextBlock Text="{Binding Command}" Foreground="Gray"></TextBlock>
                                 </StackPanel>
                             </StackPanel>
                         </StackPanel>
