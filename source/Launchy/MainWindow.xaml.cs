@@ -1,37 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Forms;
-using System.Reflection;
-using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using System.ComponentModel;
-using System.Xml.Serialization;
-using System.IO;
 using System.Windows.Threading;
+using System.Xml.Serialization;
 
 namespace Launchy
 {
+    using ManagedWinapi.Windows;
+    using System.Management;
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
-    using Ico = System.Drawing.Icon;
-    using ManagedWinapi.Windows;
-    using System.Management;
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         NotifyIcon notifyIcon;
@@ -323,7 +316,7 @@ namespace Launchy
                     }
                 }
 
-                catch (Win32Exception e)
+                catch (Win32Exception)
                 {
                     //do nothing
                 }
