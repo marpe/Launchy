@@ -1,13 +1,13 @@
 ﻿<Window x:Class="Launchy.EntryList"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="EntryList" MinHeight="250" MinWidth="520" MaxHeight="800" Height="250" Width="520" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="EntryList" Height="250" MinHeight="250" MinWidth="520" MaxHeight="500" Width="520" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
     <Grid>
         <StackPanel Orientation="Horizontal" Height="30" VerticalAlignment="Top">
             <Label>Entries:</Label>
             <Label Content="{Binding Entries.Count}"></Label>
         </StackPanel>
-        <ListBox MinHeight="100" Name="lbEntries" ItemsSource="{Binding Entries}" Margin="0, 30, 0, 60">
+            <ListBox MinHeight="100"  Margin="0, 30, 0, 60" Name="lbEntries" ItemsSource="{Binding Entries}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,2">

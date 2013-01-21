@@ -244,7 +244,6 @@ namespace Launchy
                 {
                     entries.Remove(e);
                 }
-                //throw;
             }
         }
 
@@ -298,7 +297,6 @@ namespace Launchy
                         AddEntry(new Entry(title, filename), false);
                     }
                 }
-
                 catch (Win32Exception)
                 {
                     //do nothing

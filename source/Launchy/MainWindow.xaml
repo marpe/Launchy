@@ -1,8 +1,7 @@
 ﻿<Window x:Class="Launchy.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="400" Width="800" WindowStartupLocation="CenterScreen" Name="window" StateChanged="window_StateChanged" Activated="window_Activated" Closing="window_Closing" AllowsTransparency="True" WindowStyle="None" Background="Transparent" Deactivated="window_Deactivated" Topmost="True">
-
+        Title="Launchy" Height="400" Width="800" WindowStartupLocation="CenterScreen" Name="window" StateChanged="window_StateChanged" Activated="window_Activated" Closing="window_Closing" AllowsTransparency="True" WindowStyle="None" Background="Transparent" Deactivated="window_Deactivated" Topmost="True" Icon="icon.ico">
     <StackPanel>
         <Border BorderThickness="8">
             <Border.BorderBrush>
