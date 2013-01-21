@@ -7,7 +7,7 @@
             <Label>Entries:</Label>
             <Label Content="{Binding Entries.Count}"></Label>
         </StackPanel>
-        <ListBox MaxHeight="700" MinHeight="100" MaxWidth="500" MinWidth="500" Name="lbEntries" ItemsSource="{Binding Entries}">
+        <ListBox MaxHeight="500" MinHeight="100" MaxWidth="500" MinWidth="500" Name="lbEntries" ItemsSource="{Binding Entries}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
