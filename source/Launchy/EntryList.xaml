@@ -1,32 +1,35 @@
 ﻿<Window x:Class="Launchy.EntryList"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="EntryList" MinHeight="250" MinWidth="520" Height="250" Width="520" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
-    <StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <Label>Entries:</Label>
-            <Label Content="{Binding Entries.Count}"></Label>
-        </StackPanel>
-        <ListBox MaxHeight="500" MinHeight="100" MaxWidth="500" MinWidth="500" Name="lbEntries" ItemsSource="{Binding Entries}" >
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                        <Image Source="{Binding Icon}" MinHeight="32" MinWidth="32" Margin="2,0,10,0"></Image>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Title}" Margin="0,0,0,2"></TextBlock>
-                            <TextBlock Text="{Binding Command}"></TextBlock>
-                        </StackPanel>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <StackPanel MinHeight="50" Orientation="Horizontal">
-            <Button Margin="10" Padding="10,4" Name="btnAddFile" Click="btnAdd_Click_1">Add File</Button>
-            <Button Margin="10" Padding="10,4" Name="btnAddDir" Click="btnAddDir_Click_1">Add Dir</Button>
-            <Button Margin="10" Padding="10,4" IsEnabled="{Binding hasItemSelected}" Name="btnEdit" Click="btnEdit_Click_1">Edit</Button>
-            <Button Margin="10" Padding="10,4" IsEnabled="{Binding hasItemSelected}" Name="btnDelete" Click="btnDelete_Click_1">Delete</Button>
-            <Button Margin="10" Padding="10,4" Name="btnSave" Click="btnSave_Click_1">Save</Button>
-            <Button Margin="10" Padding="10,4" Name="btnClose" Click="btnClose_Click_1">Close</Button>
-        </StackPanel>
-    </StackPanel>
+        Title="EntryList" MinHeight="250" MinWidth="1000" Height="250" Width="520" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
+    <Grid Height="550">
+        <Grid HorizontalAlignment="Left" Height="39" Margin="0,0,0,0" VerticalAlignment="Top" Width="512">
+            <Label x:Name="lbEntryListTitle" Content="Entries" HorizontalAlignment="Left" Margin="10,3,0,0" VerticalAlignment="Top" Height="26" Width="56"/>
+            <Label x:Name="lbApplicationCount" Content="{Binding Entries.Count}" HorizontalAlignment="Left" Margin="82,4,0,0" VerticalAlignment="Top" Height="26" Width="77"/>
+        </Grid>
+        <Grid Height="450">
+            <ListBox MinHeight="100" MaxWidth="2000" MinWidth="500" Name="lbEntries" ItemsSource="{Binding Entries}" >
+                <ListBox.ItemTemplate>
+                    <DataTemplate> <!--positioning for items in entry list is managed here-->
+                        <Grid HorizontalAlignment="Left" Margin="0,2,0,2">
+                            <Grid HorizontalAlignment="Left" Margin="0,0,0,0">
+                                <Image Source="{Binding Icon}" MinHeight="32" MinWidth="32" MaxHeight="32" MaxWidth="32" Margin="0,0,0,-10" HorizontalAlignment="Left"></Image>
+                                <TextBlock Text="{Binding Title}" Margin="0,0,0,2" HorizontalAlignment="Left"></TextBlock>
+                                <TextBlock Text="{Binding Command}" Margin="70,20,20,20" HorizontalAlignment="Right"></TextBlock>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+        <Grid Height="50" >
+            <!-- third value in margin controls horizontal alignment-->
+            <Button Margin="10,260,397,-240" Width="100" Padding="10,4" Name="btnAddFile" Click="btnAdd_Click_1">Add File</Button>
+            <Button Margin="10,260,180,-240" Padding="10,4" Width="100" Name="btnAddDir" Click="btnAddDir_Click_1">Add Dir</Button>
+            <Button Margin="10, 260,-40,-240" Padding="10,4" Width="100" IsEnabled="{Binding hasItemSelected}" Name="btnEdit" Click="btnEdit_Click_1">Edit</Button>
+            <Button Margin="10,260,-260,-240" Padding="10,4" Width="100" IsEnabled="{Binding hasItemSelected}" Name="btnDelete" Click="btnDelete_Click_1">Delete</Button>
+            <Button Margin="10,260,-480,-240" Padding="10,4" Width="100" Name="btnSave" Click="btnSave_Click_1">Save</Button>
+            <Button Margin="10,260,-700,-240" Padding="10,4" Width="100" Name="btnClose" Click="btnClose_Click_1">Close</Button>
+        </Grid>
+    </Grid>
 </Window>
