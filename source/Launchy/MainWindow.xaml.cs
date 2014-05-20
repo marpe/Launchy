@@ -27,7 +27,7 @@ namespace Launchy
     using KeyEventArgs = System.Windows.Input.KeyEventArgs;
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        const string fileName = "entries.xml";
+        const string ENTRIES_FILENAME = "entries.xml";
 
         private NotifyIcon notifyIcon;
         private KeyboardHook hook;
@@ -48,26 +48,23 @@ namespace Launchy
             }
         }
 
+        public bool isHookEnabled { get; set; }
+
         public static bool isCaseSensitive = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
             InitializeComponent();
 
+            isHookEnabled = true;
+
             autoComplete = new ObservableCollection<Entry>();
 
-            notifyIcon = new NotifyIcon();
-            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-            notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(notifyIcon_MouseClick);
-            notifyIcon.Visible = true;
-            hook = new KeyboardHook();
-            hook.RegisterHotKey(ModifierKeys.Control, Keys.Space);
-            hook.KeyPressed += hook_KeyPressed;
+            setupHook();
 
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMinutes(5);
-            timer.Tick += timer_Tick;
-            timer.Start();
+            setupTimer();
 
             DataContext = this;
 
@@ -75,6 +72,30 @@ namespace Launchy
 
             autoComplete.CollectionChanged += AutoComplete_CollectionChanged;
 
+            setupCustomEntries();
+
+            setupNotifyIcon();
+
+            _instance = this;
+        }
+
+        private void setupHook()
+        {
+            hook = new KeyboardHook();
+            hook.RegisterHotKey(ModifierKeys.Control, Keys.Space);
+            hook.KeyPressed += hook_KeyPressed;
+        }
+
+        private void setupTimer()
+        {
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromMinutes(5);
+            timer.Tick += timer_Tick;
+            timer.Start();
+        }
+
+        private void setupCustomEntries()
+        {
             //Custom entries
             var c = new[] {
                 new Entry() { Title = "Mouse", Command = "main.cpl" },
@@ -84,17 +105,46 @@ namespace Launchy
                 new Entry() { Title = "Sound Properties", Command = "mmsys.cpl" },
             };
 
+
+            foreach (var e in c)
+            {
+                AddEntry(e, false);
+            }
+        }
+
+        private void setupNotifyIcon()
+        {
+            notifyIcon = new NotifyIcon();
+            notifyIcon.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+            notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(notifyIcon_MouseClick);
+            notifyIcon.Visible = true;
+
+            setupNotifyIconContextMenu();
+        }
+
+        private void setupNotifyIconContextMenu()
+        {
             var cm = new System.Windows.Forms.ContextMenu();
             cm.MenuItems.Add("Show Entries", (x, y) => { showList(); });
             cm.MenuItems.Add("Add File Entry", (x, y) => { AddNewFileEntry(); });
             cm.MenuItems.Add("Add Directory Entry", (x, y) => { AddNewDirectoryEntry(); });
+            cm.MenuItems.Add("Disable Keyboard Shortcut", (sender, args) => { ToggleKeyboardShortcut((System.Windows.Forms.MenuItem)sender); });
             cm.MenuItems.Add("Close", (x, y) => { System.Windows.Application.Current.Shutdown(); });
             notifyIcon.ContextMenu = cm;
+        }
 
-            foreach (var e in c)
-                AddEntry(e, false);
+        private void ToggleKeyboardShortcut(System.Windows.Forms.MenuItem menuItem)
+        {
+            isHookEnabled = !isHookEnabled;
 
-            _instance = this;
+            if (isHookEnabled)
+            {
+                menuItem.Text = "Disable Keyboard Shortcut";
+            }
+            else
+            {
+                menuItem.Text = "Enable Keyboard Shortcut";
+            }
         }
 
         void showList()
@@ -120,6 +170,11 @@ namespace Launchy
 
         void hook_KeyPressed(object sender, KeyPressedEventArgs e)
         {
+            if (!isHookEnabled)
+            {
+                return;
+            }
+
             WindowState = System.Windows.WindowState.Normal;
             Activate();
             tbInput.Focus();
@@ -326,7 +381,7 @@ namespace Launchy
 
         public void Save()
         {
-            FileStream fs = new FileStream(fileName, FileMode.Create);
+            FileStream fs = new FileStream(ENTRIES_FILENAME, FileMode.Create);
             var list = new ObservableCollection<Entry>(entries.OrderBy(x => x.Title));
             xml.Serialize(fs, list);
             fs.Close();
@@ -334,12 +389,12 @@ namespace Launchy
 
         private void load()
         {
-            if (File.Exists(fileName))
+            if (File.Exists(ENTRIES_FILENAME))
             {
                 FileStream fs = null;
                 try
                 {
-                    fs = new FileStream(fileName, FileMode.Open);
+                    fs = new FileStream(ENTRIES_FILENAME, FileMode.Open);
                     entries = (ObservableCollection<Entry>)xml.Deserialize(fs);
                 }
                 catch (Exception e)
@@ -357,8 +412,6 @@ namespace Launchy
                 entries = new ObservableCollection<Entry>();
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         private void window_Deactivated(object sender, EventArgs e)
         {
