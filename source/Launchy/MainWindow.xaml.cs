@@ -30,6 +30,7 @@ namespace Launchy
         const string ENTRIES_FILENAME = "entries.xml";
 
         private NotifyIcon notifyIcon;
+
         private KeyboardHook hook;
         private ObservableCollection<Entry> entries { get; set; }
         public ObservableCollection<Entry> autoComplete { get; set; }
@@ -119,7 +120,26 @@ namespace Launchy
             notifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(notifyIcon_MouseClick);
             notifyIcon.Visible = true;
 
+            System.Windows.Application.Current.Exit += new ExitEventHandler(Application_Exit);
+
             setupNotifyIconContextMenu();
+        }
+
+        void Application_Exit(object sender, ExitEventArgs e)
+        {
+            try
+            {
+                if (notifyIcon != null)
+                {
+                    notifyIcon.Visible = false;
+                    notifyIcon.Icon = null;
+                    notifyIcon.Dispose();
+                    notifyIcon = null;
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void setupNotifyIconContextMenu()
@@ -255,7 +275,13 @@ namespace Launchy
             {
                 var entry = entries.FirstOrDefault(x => x.Title.Equals(r.ProcessName));
                 if (entry != null && (entry.Title + " " + entry.Command + " " + r.MainWindowTitle).MyStartsWith(input))
-                    auto.Add(new Entry(r.MainWindowTitle, entry.Command, true) { Background = new SolidColorBrush(Color.FromRgb(230, 240, 255))});
+                {
+                    var autoCompleteEntry = new Entry(r.MainWindowTitle, entry.Command, true) {
+                        Background = new SolidColorBrush(Color.FromArgb(100, 100, 140, 250))
+                    };
+
+                    auto.Add(autoCompleteEntry);
+                }
             }
 
             auto.Reverse();
@@ -372,11 +398,6 @@ namespace Launchy
                 sb.AppendLine("Command = " + e2.Command + ", " + e.Command);
                 System.Windows.MessageBox.Show(sb.ToString(), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            notifyIcon.Visible = false;
         }
 
         public void Save()
