@@ -106,7 +106,6 @@ namespace Launchy
                 new Entry() { Title = "Sound Properties", Command = "mmsys.cpl" },
             };
 
-
             foreach (var e in c)
             {
                 AddEntry(e, false);
@@ -265,7 +264,9 @@ namespace Launchy
             autoComplete.Clear();
 
             if (string.IsNullOrWhiteSpace(input))
+            {
                 return;
+            }
 
             var auto = entries.Where(x => (x.Title + " " + x.Command).MyStartsWith(input)).ToList();
 
@@ -287,8 +288,9 @@ namespace Launchy
             auto.Reverse();
 
             foreach (var entry in auto)
+            {
                 autoComplete.Add(entry);
-
+            }
 
             lbAutoComplete.SelectedIndex = 0;
         }
@@ -389,7 +391,9 @@ namespace Launchy
         {
             var e2 = entries.FirstOrDefault(x => x.Title.Equals(e.Title, StringComparison.CurrentCultureIgnoreCase));
             if (e2 == null)
+            {
                 entries.Add(e);
+            }
             else if (showError)
             {
                 StringBuilder sb = new StringBuilder();
@@ -516,6 +520,11 @@ namespace Launchy
                 menu.PlacementTarget = lbAutoComplete;
                 menu.IsOpen = true;
             }
+        }
+
+        private void launchyMainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            hook.Dispose();
         }
     }
 
